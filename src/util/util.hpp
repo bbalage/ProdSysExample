@@ -16,24 +16,30 @@ struct Job
     long StartT;
     long EndT;
     long Lateness;
+    uint machineId;
 
     std::string string() const
     {
         std::stringstream ss;
-        ss << "  " << id
-           << "   |   " << ProcT
-           << "   |   " << DueDate
-           << "   |   " << StartT
-           << "   |   " << EndT
-           << "   |   " << Lateness;
+        ss << "\t" << id
+           << "\t" << machineId
+           << "\t" << ProcT
+           << "\t" << DueDate
+           << "\t" << StartT
+           << "\t" << EndT
+           << "\t" << Lateness;
         return ss.str();
     }
 };
 
-struct Objectives
-{
-    double T;
-};
+// struct Objectives
+// {
+//     double Cmax;
+//     double Csum = 0;
+//     double Lmax = std::numeric_limits<double>::min();
+//     double Tsum = 0;
+//     double Usum = 0;
+// };
 
 std::vector<Job> create_input_data(uint numberOfJobs)
 {
@@ -47,34 +53,41 @@ std::vector<Job> create_input_data(uint numberOfJobs)
     return jobs;
 }
 
-void create_ad_hoc_schedule(std::vector<uint> &schedule, uint numberOfJobs)
+void create_ad_hoc_schedules(std::vector<std::vector<uint>> &schedules, uint numberOfJobs)
 {
+    const auto &n_machines = schedules.size();
     for (uint i = 0; i < numberOfJobs; ++i)
     {
-        schedule[i] = i;
+        auto &sch = schedules[i % schedules.size()];
+        sch.push_back(i);
     }
 }
 
 // Calculated the start and end time of the jobs.
-void simulate(std::vector<Job> &jobs, const std::vector<uint> &schedule, long t_ref)
+void simulate(std::vector<Job> &jobs, const std::vector<std::vector<uint>> &schedules, long t_ref)
 {
-    for (uint i = 0; i < jobs.size(); ++i)
+    for (uint i = 0; i < schedules.size(); ++i)
     {
-        auto &job = jobs[schedule[i]];
-        if (i == 0)
+        for (uint j = 0; j < schedules[i].size(); ++j)
         {
-            job.StartT = t_ref;
+            auto &job = jobs[schedules[i][j]];
+            if (j == 0)
+            {
+                job.StartT = t_ref;
+            }
+            else
+            {
+                job.StartT = jobs[schedules[i][j - 1]].EndT;
+            }
+            job.EndT = job.StartT + job.ProcT;
+            job.Lateness = job.EndT - job.DueDate;
+            job.machineId = i;
         }
-        else
-        {
-            job.StartT = jobs[schedule[i - 1]].EndT;
-        }
-        job.EndT = job.StartT + job.ProcT;
-        job.Lateness = job.EndT - job.DueDate;
     }
 }
 
-void evaluate(const std::vector<Job> &jobs, const std::vector<uint> &schedule, std::vector<double> &objectives)
+void evaluate(
+    const std::vector<Job> &jobs, const std::vector<std::vector<uint>> &schedules, std::vector<double> &objectives)
 {
     // Cmax completetion time
     // Csum sum of completion time of jobs
@@ -82,8 +95,15 @@ void evaluate(const std::vector<Job> &jobs, const std::vector<uint> &schedule, s
     // Tsum sum of tardiness of jobs (lateness but with no negative values)
     // Usum number of late jobs
 
-    double Cmax;
-    Cmax = jobs[schedule[schedule.size() - 1]].EndT; // Because they are executed serially.
+    double Cmax = 0;
+    for (const auto &sch : schedules)
+    {
+        if (sch.size() == 0)
+            continue;
+        const auto &endT = jobs[sch[sch.size() - 1]].EndT;
+        if (endT > Cmax)
+            Cmax = endT;
+    }
 
     double Csum = 0;
     double Lmax = std::numeric_limits<double>::min();

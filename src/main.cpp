@@ -7,26 +7,28 @@
 int main(int argc, char **argv)
 {
     std::cout << "Production cell simulation." << std::endl;
-    std::cout << "Number of jobs:" << std::endl;
-    uint numberOfJobs;
+    uint numberOfJobs, numberOfMachines;
+    std::cout << "Number of jobs?" << std::endl;
     std::cin >> numberOfJobs;
+    std::cout << "Number of machines?" << std::endl;
+    std::cin >> numberOfMachines;
 
     // Build model
     std::vector<Job> jobs = create_input_data(numberOfJobs);
     // std::vector<std::function<double(int)>> objFunctions();
 
     // Scheduling
-    std::vector<uint> schedule(numberOfJobs);
-    create_ad_hoc_schedule(schedule, numberOfJobs);
+    std::vector<std::vector<uint>> schedules(numberOfMachines);
+    create_ad_hoc_schedules(schedules, numberOfJobs);
 
     // Simulation
     constexpr long t_ref = 0UL;
-    simulate(jobs, schedule, t_ref);
+    simulate(jobs, schedules, t_ref);
 
     // Evaluation
     constexpr size_t numberOfObjectives = 5;
     std::vector<double> objectives(numberOfObjectives);
-    evaluate(jobs, schedule, objectives);
+    evaluate(jobs, schedules, objectives);
 
     // Output
     std::cout << "Performance report:\n"
@@ -36,7 +38,7 @@ int main(int argc, char **argv)
               << "Tsum: " << objectives[3] << "\n"
               << "Usum: " << objectives[4] << std::endl;
 
-    std::cout << "  id  |  ProcT  |  DueT  |  StartT  |  EndT  |  Lateness\n";
+    std::cout << "\tid\tMid\tProcT\tDueT\tStartT\tEndT\tLateness\n";
     for (const auto &job : jobs)
     {
         std::cout << job.string() << "\n";
