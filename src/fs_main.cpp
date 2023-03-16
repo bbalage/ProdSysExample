@@ -23,4 +23,12 @@ int main()
     print_resource_gant_table(jobs, sch, number_of_resources);
 
     print_eval(eval);
+
+    local_search(jobs, sch, number_of_resources, 0L, 100, 100);
+
+    eval = evaluate(jobs, sch, number_of_resources);
+
+    print_resource_gant_table(jobs, sch, number_of_resources);
+
+    print_eval(eval);
 }
