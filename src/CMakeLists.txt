@@ -12,3 +12,8 @@ set(MAIN_EXECUTABLE_NAME ${CMAKE_PROJECT_NAME})
 add_executable(${MAIN_EXECUTABLE_NAME} "main.cpp")
 target_link_libraries(${MAIN_EXECUTABLE_NAME}
     ${LIB_NAME})
+
+set(FS_EXECUTABLE_NAME ${CMAKE_PROJECT_NAME}_FS)
+add_executable(${FS_EXECUTABLE_NAME} "fs_main.cpp")
+target_link_libraries(${MAIN_EXECUTABLE_NAME}
+    ${LIB_NAME})

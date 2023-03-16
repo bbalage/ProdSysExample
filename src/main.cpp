@@ -1,8 +1,10 @@
 #include <iostream>
-#include <functional>
-#include "util/util.hpp"
+// #include <functional>
+#include "util/simple.hpp"
 
 // We have a result vector
+
+using namespace par;
 
 int main(int argc, char **argv)
 {
