@@ -40,7 +40,7 @@ namespace fs
             for (uint j = 0; j < numberOfResources; ++j)
             {
                 jobs[i].ProcT.push_back(1 + rand() % 100);
-                jobs[i].DueDate.push_back(1 + numberOfJobs * numberOfResources * (rand() % 50)); // TODO: Improve
+                jobs[i].DueDate.push_back(1 + numberOfJobs * (rand() % 100)); // TODO: Improve
             }
         }
         return jobs;
@@ -69,9 +69,11 @@ namespace fs
     {
         for (uint i = 0; i < jobs.size(); ++i)
         {
+            auto &job = jobs[sch[i]];
+            job.StartT.clear();
+            job.EndT.clear();
             for (uint j = 0; j < numberOfResources; ++j) // We use identical technology plan.
             {
-                auto &job = jobs[sch[i]];
                 if (i == 0)
                 {
                     if (j == 0)
@@ -133,12 +135,16 @@ namespace fs
         {
             std::cout << "\n"
                       << i << ". resource: ";
-            std::cout << "\n # \t job \t start \t proc \t finish ";
+            std::cout << "\n # \t job \t start \t proc \t finish \t due";
             for (const auto &j : sch)
             {
                 const auto &job = jobs[j];
                 std::cout << "\n\t"
-                          << job.id << "\t" << job.StartT[i] << "\t" << job.ProcT[i] << "\t" << job.EndT[i];
+                          << job.id << "\t"
+                          << job.StartT[i] << "\t"
+                          << job.ProcT[i] << "\t"
+                          << job.EndT[i] << "\t"
+                          << job.DueDate[i];
             }
         }
         std::cout << std::endl;
@@ -170,6 +176,36 @@ namespace fs
         }
     }
 
+    /**
+     * The relative aggregation function described in the docs,
+     * implemented here.
+     *
+     * @param x
+     * @param y
+     * @param K number of parameters. In this case, fields in Eval.
+     * @return double
+     */
+    double F(const Eval &x, const Eval &y, const std::vector<double> &ws)
+    {
+        std::vector<double> xs{x.Cmax, x.Csum, x.Lmax, x.Tsum, x.Usum};
+        std::vector<double> ys{y.Cmax, y.Csum, y.Lmax, y.Tsum, y.Usum};
+        double F_ret = 0.0;
+        for (int k = 0; k < xs.size(); ++k)
+        {
+            double D;
+            double a = xs[k];
+            double b = ys[k];
+            double w = ws[k];
+            if (std::max(a, b) == 0)
+                D = 0;
+            else
+                D = (b - a) / std::max(a, b);
+
+            F_ret += w * D;
+        }
+        return F_ret;
+    }
+
     void local_search(std::vector<Job> &jobs,
                       std::vector<uint> &sch,
                       int numberOfResources,
@@ -194,6 +230,7 @@ namespace fs
 
         simulate(jobs, sch, numberOfResources, t_ref);
         f_best = evaluate(jobs, s_best, numberOfResources);
+        const std::vector<double> weights{2.0, 1.0, 5.0, 1.0, 1.0};
 
         for (uint step = 1; step <= steps; ++step)
         {
@@ -207,14 +244,14 @@ namespace fs
                     s_ext = s_act;
                     f_ext = f_act;
                 }
-                else if (f_ext.Cmax > f_act.Cmax)
+                else if (F(f_ext, f_act, weights) < 0.0)
                 {
                     s_ext = s_act;
                     f_ext = f_act;
                 }
             }
             s_0 = s_ext;
-            if (f_best.Cmax > f_ext.Cmax)
+            if (F(f_best, f_ext, weights) < 0.0)
             {
                 s_best = s_ext;
                 f_best = f_ext;

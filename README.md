@@ -38,3 +38,32 @@ The order of machines do not change.
 
 We are looking for the order in which the $C_max$ is 
 smallest
+
+## Multipurpose optimization
+Can be done by:
+1. Linear combination of purposes. **Problem:** Value space could
+be very different.
+2. Hierarchic optimization. **Problem:** Algorithm sensitive.
+3. Parallel optimization. Counts the purpose function results that
+are better than the other. If more are better, than the result is 
+better.
+
+### Another way to do multi-purpose optimization
+- Relative comparisons.
+- K functions are given (optimization purpose / objective functions).
+
+The functions' return values must not be negative numbers.
+
+D:= 0, if f1(x) és f2(x) = 0, otherwise (f2(x) - f1(x)) / max(f1(x), f2(x))
+
+D returns a relative difference between -1 and 1.
+
+$D(a,b) = \frac{b-a}{max(a,b)} \in [-1;1]$
+
+Sum of relative differences:\
+$F(x,y) = \sum_{k=1}^{K} D(f_k(x),f_k(y))$
+
+Weighted sum of relative differences:\
+$F(x,y) = \sum_{k=1}^{K} w_k D(f_k(x),f_k(y))$
+
+The weight values can be set by the user.
