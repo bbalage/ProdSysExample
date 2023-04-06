@@ -67,3 +67,11 @@ Weighted sum of relative differences:\
 $F(x,y) = \sum_{k=1}^{K} w_k D(f_k(x),f_k(y))$
 
 The weight values can be set by the user.
+
+## Time constraints
+Not all resources are always available. There are times, when we cannot 
+use a resource for any operation.
+
+The operations can be of two types.
+1. Atomic.
+2. Divisible.

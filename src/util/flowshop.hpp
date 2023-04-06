@@ -72,6 +72,8 @@ namespace fs
             auto &job = jobs[sch[i]];
             job.StartT.clear();
             job.EndT.clear();
+            job.StartT.reserve(numberOfResources);
+            job.EndT.reserve(numberOfResources);
             for (uint j = 0; j < numberOfResources; ++j) // We use identical technology plan.
             {
                 if (i == 0)
@@ -230,7 +232,7 @@ namespace fs
 
         simulate(jobs, sch, numberOfResources, t_ref);
         f_best = evaluate(jobs, s_best, numberOfResources);
-        const std::vector<double> weights{2.0, 1.0, 5.0, 1.0, 1.0};
+        const std::vector<double> weights{2.0, 1.0, 50.0, 1.0, 10.0};
 
         for (uint step = 1; step <= steps; ++step)
         {

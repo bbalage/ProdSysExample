@@ -20,7 +20,7 @@ int main()
 
     Eval eval = evaluate(jobs, sch, number_of_resources);
 
-    print_resource_gant_table(jobs, sch, number_of_resources);
+    // print_resource_gant_table(jobs, sch, number_of_resources);
 
     print_eval(eval);
 
@@ -28,7 +28,7 @@ int main()
 
     eval = evaluate(jobs, sch, number_of_resources);
 
-    print_resource_gant_table(jobs, sch, number_of_resources);
+    // print_resource_gant_table(jobs, sch, number_of_resources);
 
     print_eval(eval);
 }
